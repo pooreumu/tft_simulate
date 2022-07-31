@@ -9,6 +9,14 @@ function App() {
   const eightGoldChamp = ["다에야", "사이펜", "시오유", "이다스"];
   const tenGoldChamp = ["쉬바나", "아오 신", "아우렐리온 솔"];
 
+  const oneGoldChampList = oneGoldChamp.map((e) => ({ name: e, gold: 1 }));
+  const twoGoldChampList = twoGoldChamp.map((e) => ({ name: e, gold: 2 }));
+  const threeGoldChampList = threeGoldChamp.map((e) => ({ name: e, gold: 3 }));
+  const fourGoldChampList = fourGoldChamp.map((e) => ({ name: e, gold: 4 }));
+  const fiveGoldChampList = fiveGoldChamp.map((e) => ({ name: e, gold: 5 }));
+  const eightGoldChampList = eightGoldChamp.map((e) => ({ name: e, gold: 8 }));
+  const tenGoldChampList = tenGoldChamp.map((e) => ({ name: e, gold: 10 }));
+
   const onePool = [];
   const twoPool = [];
   const threePool = [];
@@ -17,7 +25,6 @@ function App() {
   const eightPool = [];
   const tenPool = [];
 
-  const champBasket = ["", "", "", "", "", "", "", "", ""];
   const field = [];
 
   const percent = [
@@ -38,32 +45,31 @@ function App() {
   };
   const initChampPool = () => {
     for (let i = 0; i < 29; i++) {
-      onePool.push(...oneGoldChamp);
+      onePool.push(...oneGoldChampList);
     }
     for (let i = 0; i < 22; i++) {
-      twoPool.push(...twoGoldChamp);
+      twoPool.push(...twoGoldChampList);
     }
     for (let i = 0; i < 18; i++) {
-      threePool.push(...threeGoldChamp);
+      threePool.push(...threeGoldChampList);
     }
     for (let i = 0; i < 12; i++) {
-      fourPool.push(...fourGoldChamp);
+      fourPool.push(...fourGoldChampList);
     }
     for (let i = 0; i < 10; i++) {
-      fivePool.push(...fiveGoldChamp);
+      fivePool.push(...fiveGoldChampList);
     }
     for (let i = 0; i < 12; i++) {
-      eightPool.push(...eightGoldChamp);
+      eightPool.push(...eightGoldChampList);
     }
     for (let i = 0; i < 10; i++) {
-      tenPool.push(...tenGoldChamp);
+      tenPool.push(...tenGoldChampList);
     }
   };
 
   const levelChampPool = () => {};
   initChampPool();
 
-  console.log(onePool);
   const initpickChampList = ["", "", "", "", ""];
   const requireExp = [0, 2, 2, 6, 10, 20, 36, 56, 80];
   const [gold, setGold] = useState(1);
@@ -72,7 +78,18 @@ function App() {
   const [level, setLevel] = useState(1);
   const [exp, setExp] = useState(0);
   const [maxExp, setMaxExp] = useState(2);
-  const [pickChampList, setPickChampList] = useState(initpickChampList.map(() => onePool[getRandomInt(0, onePool.length)]));
+  const [pickChampList, setPickChampList] = useState(initpickChampList.map((e, i) => onePool.splice(getRandomInt(0, onePool.length), 1)[0]));
+  const [champBasketList, setChampBasketList] = useState([
+    { name: "", gold: 0 },
+    { name: "", gold: 0 },
+    { name: "", gold: 0 },
+    { name: "", gold: 0 },
+    { name: "", gold: 0 },
+    { name: "", gold: 0 },
+    { name: "", gold: 0 },
+    { name: "", gold: 0 },
+    { name: "", gold: 0 },
+  ]);
 
   const onClickReroll = () => {
     if (gold > 1)
@@ -82,9 +99,13 @@ function App() {
       });
   };
   const reroll = () => {
-    setPickChampList((prev) => initpickChampList.map(() => onePool[getRandomInt(0, onePool.length)]));
+    setPickChampList((prev) =>
+      prev.map((e, i) => {
+        onePool.push(e);
+        return onePool.splice(getRandomInt(0, onePool.length), 1)[0];
+      })
+    );
   };
-
   const onClickLevelUp = () => {
     if (gold > 3) {
       setGold((prev) => prev - 4);
@@ -145,9 +166,26 @@ function App() {
         if (prev >= maxExp) levelUp(prev - maxExp);
         else return prev;
       });
+      reroll();
     }
   };
 
+  const buyChamp = (index) => {
+    const checkBasket = champBasketList.filter((e) => e.name === "");
+    if (gold >= pickChampList[index].gold && checkBasket.length >= 1) {
+      champBasketList[champBasketList.findIndex((e) => e.name === "")] = pickChampList[index];
+      setChampBasketList((prev) => champBasketList);
+      const minusGold = pickChampList[index].gold;
+      setGold((prev) => prev - minusGold);
+      pickChampList[index] = { name: "", gold: 0 };
+      setPickChampList((prev) => pickChampList);
+    }
+  };
+  const sellChamp = (index) => {
+    const plusGold = champBasketList[index].gold;
+    setGold((prev) => prev + plusGold);
+    champBasketList[index] = { name: "", gold: 0 };
+  };
   return (
     <div>
       <h1>Welcome Back!</h1>
@@ -163,23 +201,31 @@ function App() {
       <table>
         {field.map((e) => (
           <td>
-            <button>{e}</button>
+            <button>{e.name}</button>
           </td>
         ))}
       </table>
       <table>
-        {champBasket.map((e) => (
-          <td>
-            <button>{e}</button>
-          </td>
-        ))}
+        <tbody>
+          <tr>
+            {champBasketList.map((e, i) => (
+              <td key={i}>
+                <button onClick={() => sellChamp(i)}>{e.name}</button>
+              </td>
+            ))}
+          </tr>
+        </tbody>
       </table>
       <table>
-        {pickChampList.map((e) => (
-          <td>
-            <button>{e}</button>
-          </td>
-        ))}
+        <tbody>
+          <tr>
+            {pickChampList.map((e, i) => (
+              <td key={i}>
+                <button onClick={() => buyChamp(i)}>{e.name}</button>
+              </td>
+            ))}
+          </tr>
+        </tbody>
       </table>
 
       <button onClick={onClickReroll}>새로고침</button>
