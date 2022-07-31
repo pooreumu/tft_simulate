@@ -9,13 +9,13 @@ function App() {
   const eightGoldChamp = ["다에야", "사이펜", "시오유", "이다스"];
   const tenGoldChamp = ["쉬바나", "아오 신", "아우렐리온 솔"];
 
-  const oneGoldChampList = oneGoldChamp.map((e) => ({ name: e, gold: 1 }));
-  const twoGoldChampList = twoGoldChamp.map((e) => ({ name: e, gold: 2 }));
-  const threeGoldChampList = threeGoldChamp.map((e) => ({ name: e, gold: 3 }));
-  const fourGoldChampList = fourGoldChamp.map((e) => ({ name: e, gold: 4 }));
-  const fiveGoldChampList = fiveGoldChamp.map((e) => ({ name: e, gold: 5 }));
-  const eightGoldChampList = eightGoldChamp.map((e) => ({ name: e, gold: 8 }));
-  const tenGoldChampList = tenGoldChamp.map((e) => ({ name: e, gold: 10 }));
+  const oneGoldChampList = oneGoldChamp.map((e) => ({ name: e, gold: 1, star: 1 }));
+  const twoGoldChampList = twoGoldChamp.map((e) => ({ name: e, gold: 2, star: 1 }));
+  const threeGoldChampList = threeGoldChamp.map((e) => ({ name: e, gold: 3, star: 1 }));
+  const fourGoldChampList = fourGoldChamp.map((e) => ({ name: e, gold: 4, star: 1 }));
+  const fiveGoldChampList = fiveGoldChamp.map((e) => ({ name: e, gold: 5, star: 1 }));
+  const eightGoldChampList = eightGoldChamp.map((e) => ({ name: e, gold: 8, star: 1 }));
+  const tenGoldChampList = tenGoldChamp.map((e) => ({ name: e, gold: 10, star: 1 }));
 
   const onePool = [];
   const twoPool = [];
@@ -24,8 +24,6 @@ function App() {
   const fivePool = [];
   const eightPool = [];
   const tenPool = [];
-
-  const field = [];
 
   const percent = [
     [100, 0, 0, 0, 0],
@@ -38,6 +36,8 @@ function App() {
     [15, 20, 35, 25, 5],
     [10, 15, 30, 30, 15],
   ];
+  const currentPercent = [100, 100, 100, 100];
+
   const getRandomInt = (min, max) => {
     min = Math.ceil(min);
     max = Math.floor(max);
@@ -67,7 +67,6 @@ function App() {
     }
   };
 
-  const levelChampPool = () => {};
   initChampPool();
 
   const initpickChampList = ["", "", "", "", ""];
@@ -79,17 +78,8 @@ function App() {
   const [exp, setExp] = useState(0);
   const [maxExp, setMaxExp] = useState(2);
   const [pickChampList, setPickChampList] = useState(initpickChampList.map((e, i) => onePool.splice(getRandomInt(0, onePool.length), 1)[0]));
-  const [champBasketList, setChampBasketList] = useState([
-    { name: "", gold: 0 },
-    { name: "", gold: 0 },
-    { name: "", gold: 0 },
-    { name: "", gold: 0 },
-    { name: "", gold: 0 },
-    { name: "", gold: 0 },
-    { name: "", gold: 0 },
-    { name: "", gold: 0 },
-    { name: "", gold: 0 },
-  ]);
+  const [champBasketList, setChampBasketList] = useState(new Array(9).fill({ name: "", gold: 0, star: 1 }));
+  const [field, setField] = useState([{ name: "", gold: 0, star: 1 }]);
 
   const onClickReroll = () => {
     if (gold > 1)
@@ -98,14 +88,74 @@ function App() {
         return (prev -= 2);
       });
   };
-  const reroll = () => {
-    setPickChampList((prev) =>
-      prev.map((e, i) => {
-        onePool.push(e);
-        return onePool.splice(getRandomInt(0, onePool.length), 1)[0];
-      })
-    );
+
+  const pickOneGoldChamp = () => {
+    return onePool.splice(getRandomInt(0, onePool.length), 1)[0];
   };
+  const pickTwoGoldChamp = () => {
+    return twoPool.splice(getRandomInt(0, twoPool.length), 1)[0];
+  };
+  const pickThreeGoldChamp = () => {
+    return threePool.splice(getRandomInt(0, threePool.length), 1)[0];
+  };
+  const pickFourGoldChamp = () => {
+    return fourPool.splice(getRandomInt(0, fourPool.length), 1)[0];
+  };
+  const pickFiveGoldChamp = () => {
+    return fivePool.splice(getRandomInt(0, fivePool.length), 1)[0];
+  };
+  const pickEightGoldChamp = () => {
+    return eightPool.splice(getRandomInt(0, eightPool.length), 1)[0];
+  };
+  const pickTenGoldChamp = () => {
+    return tenPool.splice(getRandomInt(0, tenPool.length), 1)[0];
+  };
+
+  const range = () => {
+    let percentValue = percent[level - 1][0];
+    for (let i = 0; i < currentPercent.length; i++) {
+      currentPercent[i] -= percentValue;
+      percentValue += percent[level - 1][i + 1];
+    }
+  };
+
+  range();
+
+  const reroll = () => {
+    const newList = pickChampList.map((v) => {
+      v.gold === 1
+        ? onePool.push(v)
+        : v.gold === 2
+        ? twoPool.push(v)
+        : v.gold === 3
+        ? threePool.push(v)
+        : v.gold === 4
+        ? fourPool.push(v)
+        : v.gold === 5
+        ? fivePool.push(v)
+        : v.gold === 8
+        ? eightPool.push(v)
+        : tenPool.push(v);
+      const pickLevel = getRandomInt(1, 101);
+      for (let [i, e] of currentPercent.entries()) {
+        if (pickLevel > e) {
+          if (i === 0) return pickOneGoldChamp();
+          else if (i === 1) return pickTwoGoldChamp();
+          else if (i === 2) return pickThreeGoldChamp();
+          else if (i === 3) {
+            const dragon = getRandomInt(1, 3);
+            return dragon === 1 ? pickFourGoldChamp() : pickEightGoldChamp();
+          }
+        }
+      }
+      const dragon = getRandomInt(1, 3);
+      return dragon === 1 ? pickFiveGoldChamp() : pickTenGoldChamp();
+    });
+    setPickChampList((prev) => {
+      return newList;
+    });
+  };
+
   const onClickLevelUp = () => {
     if (gold > 3) {
       setGold((prev) => prev - 4);
@@ -126,6 +176,8 @@ function App() {
       setMaxExp((prev) => (prev = requireExp[nextLevel]));
       return nextLevel;
     });
+    const newField = [...field, { name: "", gold: 0, star: 1 }];
+    setField((prev) => newField);
   };
 
   const nextRound = () => {
@@ -172,20 +224,35 @@ function App() {
 
   const buyChamp = (index) => {
     const checkBasket = champBasketList.filter((e) => e.name === "");
-    if (gold >= pickChampList[index].gold && checkBasket.length >= 1) {
-      champBasketList[champBasketList.findIndex((e) => e.name === "")] = pickChampList[index];
-      setChampBasketList((prev) => champBasketList);
-      const minusGold = pickChampList[index].gold;
-      setGold((prev) => prev - minusGold);
-      pickChampList[index] = { name: "", gold: 0 };
-      setPickChampList((prev) => pickChampList);
+    const checkField = field.filter((e) => e.name === "");
+    if (gold >= pickChampList[index].gold) {
+      if (checkBasket.length >= 1) {
+        champBasketList[champBasketList.findIndex((e) => e.name === "")] = pickChampList[index];
+        setChampBasketList((prev) => champBasketList);
+        const minusGold = pickChampList[index].gold;
+        setGold((prev) => prev - minusGold);
+        pickChampList[index] = { name: "", gold: 0 };
+        setPickChampList((prev) => pickChampList);
+      } else if (checkField.length >= 1) {
+        field[field.findIndex((e) => e.name === "")] = pickChampList[index];
+        setField((prev) => field);
+        const minusGold = pickChampList[index].gold;
+        setGold((prev) => prev - minusGold);
+        pickChampList[index] = { name: "", gold: 0 };
+        setPickChampList((prev) => pickChampList);
+      }
+
+      const upgradeStar = [...field, ...champBasketList].sort((a, b) => a.name - b.name);
+      console.log(upgradeStar);
     }
   };
+
   const sellChamp = (index) => {
     const plusGold = champBasketList[index].gold;
     setGold((prev) => prev + plusGold);
     champBasketList[index] = { name: "", gold: 0 };
   };
+
   return (
     <div>
       <h1>Welcome Back!</h1>
@@ -199,11 +266,15 @@ function App() {
       <h6>골드: {gold}</h6>
 
       <table>
-        {field.map((e) => (
-          <td>
-            <button>{e.name}</button>
-          </td>
-        ))}
+        <tbody>
+          <tr>
+            {field.map((e, i) => (
+              <td key={i}>
+                <button>{e.name}</button>
+              </td>
+            ))}
+          </tr>
+        </tbody>
       </table>
       <table>
         <tbody>
@@ -219,11 +290,13 @@ function App() {
       <table>
         <tbody>
           <tr>
-            {pickChampList.map((e, i) => (
-              <td key={i}>
-                <button onClick={() => buyChamp(i)}>{e.name}</button>
-              </td>
-            ))}
+            {pickChampList.map((e, i) => {
+              return (
+                <td key={i}>
+                  <button onClick={() => buyChamp(i)}>{e.name}</button>
+                </td>
+              );
+            })}
           </tr>
         </tbody>
       </table>
