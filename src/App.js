@@ -247,10 +247,15 @@ function App() {
     }
   };
 
-  const sellChamp = (index) => {
+  const sellChampBasket = (index) => {
     const plusGold = champBasketList[index].gold;
     setGold((prev) => prev + plusGold);
     champBasketList[index] = { name: "", gold: 0 };
+  };
+  const sellChampField = (index) => {
+    const plusGold = field[index].gold;
+    setGold((prev) => prev + plusGold);
+    field[index] = { name: "", gold: 0 };
   };
 
   return (
@@ -270,7 +275,7 @@ function App() {
           <tr>
             {field.map((e, i) => (
               <td key={i}>
-                <button>{e.name}</button>
+                <button onClick={() => sellChampField(i)}>{e.name}</button>
               </td>
             ))}
           </tr>
@@ -281,7 +286,7 @@ function App() {
           <tr>
             {champBasketList.map((e, i) => (
               <td key={i}>
-                <button onClick={() => sellChamp(i)}>{e.name}</button>
+                <button onClick={() => sellChampBasket(i)}>{e.name}</button>
               </td>
             ))}
           </tr>
